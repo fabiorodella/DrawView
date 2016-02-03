@@ -43,7 +43,7 @@ class ViewController: UIViewController {
     }
     @IBAction func saveCanvas(sender: AnyObject) {
         let saveAction = UIAlertController(title: "Draw View Saving", message: "", preferredStyle: .ActionSheet)
-        saveAction.addAction(UIAlertAction(title: "Save to Camera Roll", style: .Default, handler: { (action: UIAlertAction!) -> Void in
+        saveAction.addAction(UIAlertAction(title: "Save to Camera Roll", style: .Default, handler: { (action: UIAlertAction) -> Void in
             let canvasImage = self.mainDrawView.imageRepresentation()
             let cameraRoll = ALAssetsLibrary()
             cameraRoll.writeImageToSavedPhotosAlbum(canvasImage.CGImage, orientation: .Up, completionBlock: { (assetURL: NSURL!, error: NSError!) -> Void in
@@ -51,11 +51,11 @@ class ViewController: UIViewController {
                 NSLog("\(error)")
             })
         }))
-        saveAction.addAction(UIAlertAction(title: "Save as UIImage", style: .Default, handler: { (action: UIAlertAction!) -> Void in
+        saveAction.addAction(UIAlertAction(title: "Save as UIImage", style: .Default, handler: { (action: UIAlertAction) -> Void in
             let canvasImage = self.mainDrawView.imageRepresentation()
             NSLog("\(canvasImage)")
         }))
-        saveAction.addAction(UIAlertAction(title: "Save as UIBezierPath", style: .Default, handler: { (action: UIAlertAction!) -> Void in
+        saveAction.addAction(UIAlertAction(title: "Save as UIBezierPath", style: .Default, handler: { (action: UIAlertAction) -> Void in
             let canvasPath = self.mainDrawView.bezierPathRepresentation()
             NSLog("\(canvasPath)")
         }))

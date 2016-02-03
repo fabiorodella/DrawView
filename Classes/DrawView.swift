@@ -35,15 +35,11 @@ class DrawView: UIView {
     private var animationLayer: CAShapeLayer?
     private var isAnimating: Bool = false
     // MARK: Init
-    override init() {
-        super.init()
-        self.setupCanvas()
-    }
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setupCanvas()
     }
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.setupCanvas()
     }
@@ -51,7 +47,7 @@ class DrawView: UIView {
     private func setupCanvas() {
         self.backgroundColor = UIColor.whiteColor()
         self.signLine = UIBezierPath()
-        self.signLine?.lineCapStyle = kCGLineCapRound
+        self.signLine?.lineCapStyle = .Round
         self.signLine?.lineWidth = 3.0
         // Draw the "x" for the line
         self.signLine?.moveToPoint(CGPointMake(20.0, self.frame.size.height-30.0))
@@ -66,18 +62,18 @@ class DrawView: UIView {
     override func drawRect(rect: CGRect) {
         if !isAnimating{
             self.strokeColor.setStroke()
-            if let existing = self.existingPath {
-                self.bezierPath.strokeWithBlendMode(kCGBlendModeNormal, alpha: 1.0)
+            if let _ = self.existingPath {
+                self.bezierPath.strokeWithBlendMode(.Normal, alpha: 1.0)
             }else{
                 for path in self.paths{
-                    path.strokeWithBlendMode(kCGBlendModeNormal, alpha: 1.0)
+                    path.strokeWithBlendMode(.Normal, alpha: 1.0)
                 }
             }
         }
         
         if self.drawingMode == .Signature {
             UIColor.lightGrayColor().setStroke()
-            self.signLine?.strokeWithBlendMode(kCGBlendModeNormal, alpha: 1.0)
+            self.signLine?.strokeWithBlendMode(.Normal, alpha: 1.0)
         }
     }
     // MARK: Public Functions
@@ -87,7 +83,7 @@ class DrawView: UIView {
         
         self.bezierPath = UIBezierPath()
         self.bezierPath.CGPath = self.existingPath!
-        self.bezierPath.lineCapStyle = kCGLineCapRound
+        self.bezierPath.lineCapStyle = .Round
         self.bezierPath.lineWidth = self.strokeWidth
         self.bezierPath.miterLimit = 0.0
         // If iPad, apply the scale first so the paths bounds is in its final state.
@@ -129,7 +125,9 @@ class DrawView: UIView {
     // MARK View Draw Reading
     func imageRepresentation() -> UIImage {
         UIGraphicsBeginImageContext(self.bounds.size)
-        let context = UIGraphicsGetCurrentContext()
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return UIImage()
+        }
         self.layer.renderInContext(context)
         let viewImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
@@ -174,30 +172,30 @@ class DrawView: UIView {
         animation.toValue = 1.0
         animation.delegate = self
         self.animationLayer?.addAnimation(animation, forKey: "strokeEnd")
-        self.layer.addSublayer(self.animationLayer?)
+        self.layer.addSublayer(self.animationLayer!)
     }
-    override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
+    override func animationDidStop(anim: CAAnimation, finished flag: Bool) {
         self.isAnimating = false
         self.animationLayer?.removeFromSuperlayer()
         self.animationLayer = CAShapeLayer()
         self.setNeedsDisplay()
     }
     // MARK: Touch Tracking
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if self.editingMode == .Editable {
             self.bezierPath = UIBezierPath()
-            self.bezierPath.lineCapStyle = kCGLineCapRound
+            self.bezierPath.lineCapStyle = .Round
             self.bezierPath.lineWidth = self.strokeWidth
             self.bezierPath.miterLimit = 0.0
             
-            let touch = touches.allObjects[0] as UITouch
+            let touch = touches.first!
             bezierPath.moveToPoint(touch.locationInView(self))
             self.paths.append(self.bezierPath)
         }
     }
-    override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
+    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if self.editingMode == .Editable {
-            let touch = touches.allObjects[0] as UITouch
+            let touch = touches.first!
             self.bezierPath.addLineToPoint(touch.locationInView(self))
             self.setNeedsDisplay()
         }
